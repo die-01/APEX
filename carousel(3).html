@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Carousel — Tailwind, sans JS</title>
+    <style>
+        /* ===================================================================
+           Reset minimal + classes utilitaires "façon Tailwind" écrites en CSS
+           natif (pas de CDN externe : fonctionne aussi en file:// hors-ligne)
+           =================================================================== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #0b1d4d;
+            padding: 24px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        /* Inputs radio cachés : moteur d'état du carousel (aucun JS) */
+        .slide-radio {
+            display: none;
+        }
+
+        #carousel {
+            margin: 0 auto;
+            width: 100%;
+            max-width: 1280px;
+        }
+
+        .carousel-stage {
+            position: relative;
+            height: 620px;
+            width: 100%;
+            overflow: hidden;
+            border-radius: 2px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* État par défaut d'une slide : réduite et placée en bas, prête à entrer */
+        .slide {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transform: scale(0.82) translateY(90px);
+            transition: opacity .45s ease, transform .55s cubic-bezier(.6, .05, .25, 1);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .slide-inner {
+            position: relative;
+            height: 100%;
+            width: 100%;
+            background-color: #0b1d4d;
+        }
+
+        .slide-inner.is-dark {
+            background-color: #525252;
+        }
+
+        .slide-title {
+            position: absolute;
+            left: 48px;
+            top: 50%;
+            max-width: 600px;
+            transform: translateY(-50%);
+        }
+
+        .slide-title h1 {
+            font-size: 58px;
+            font-weight: 800;
+            text-transform: uppercase;
+            line-height: 0.95;
+            letter-spacing: -0.02em;
+            color: #fff;
+        }
+
+        .slide-link {
+            position: absolute;
+            left: 48px;
+            bottom: 80px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+            padding-bottom: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .slide-link:hover {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Slide active : taille normale, centrée, visible */
+        #slide-1:checked ~ .carousel-stage [data-slide="1"],
+        #slide-2:checked ~ .carousel-stage [data-slide="2"],
+        #slide-3:checked ~ .carousel-stage [data-slide="3"],
+        #slide-4:checked ~ .carousel-stage [data-slide="4"] {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            pointer-events: auto;
+            z-index: 3;
+            transition: opacity .55s ease .4s, transform .6s cubic-bezier(.2, .8, .2, 1) .4s;
+        }
+
+        /* Boutons précédent/suivant : une paire par slide active, une seule visible à la fois */
+        .nav-controls {
+            position: absolute;
+            left: 48px;
+            bottom: 40px;
+            z-index: 20;
+        }
+
+        .nav-pair {
+            display: none;
+            gap: 12px;
+        }
+
+        #slide-1:checked ~ .carousel-stage .nav-pair[data-for="1"],
+        #slide-2:checked ~ .carousel-stage .nav-pair[data-for="2"],
+        #slide-3:checked ~ .carousel-stage .nav-pair[data-for="3"],
+        #slide-4:checked ~ .carousel-stage .nav-pair[data-for="4"] {
+            display: flex;
+        }
+
+        .nav-btn {
+            display: flex;
+            height: 44px;
+            width: 44px;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            color: #fff;
+            font-size: 16px;
+            transition: background-color .2s ease;
+        }
+
+        .nav-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Indicateurs (points) : le point actif s'allonge et devient blanc */
+        .dots {
+            position: absolute;
+            right: 40px;
+            bottom: 40px;
+            z-index: 20;
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            height: 6px;
+            width: 24px;
+            cursor: pointer;
+            border-radius: 999px;
+            background-color: rgba(255, 255, 255, 0.3);
+            transition: background-color .3s ease, transform .3s ease;
+        }
+
+        #slide-1:checked ~ .carousel-stage .dots label[for="slide-1"],
+        #slide-2:checked ~ .carousel-stage .dots label[for="slide-2"],
+        #slide-3:checked ~ .carousel-stage .dots label[for="slide-3"],
+        #slide-4:checked ~ .carousel-stage .dots label[for="slide-4"] {
+            background-color: #fff;
+            transform: scaleX(1.8);
+        }
+
+        /* Images plein cadre pour chaque visuel de slide */
+        .img-fit {
+            position: absolute;
+            object-fit: cover;
+        }
+
+        .panel-light {
+            position: absolute;
+            background-color: #f4f4f4;
+        }
+
+        .panel-grey {
+            position: absolute;
+            background-color: #cfcfcf;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Radios cachés : mémoire d'état du carousel, pilotés uniquement en CSS -->
+    <input type="radio" name="carousel-slide" id="slide-1" class="slide-radio" checked>
+    <input type="radio" name="carousel-slide" id="slide-2" class="slide-radio">
+    <input type="radio" name="carousel-slide" id="slide-3" class="slide-radio">
+    <input type="radio" name="carousel-slide" id="slide-4" class="slide-radio">
+
+    <section id="carousel">
+
+        <!-- Cadre du carousel : toutes les slides sont superposées à l'intérieur -->
+        <div class="carousel-stage">
+
+            <!-- Slide 1 : Biomedical Research Institution -->
+            <div class="slide" data-slide="1">
+                <div class="slide-inner">
+                    <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=1200&q=80"
+                        class="img-fit" style="top:0; right:0; height:270px; width:990px;" alt="">
+                    <div class="panel-light" style="top:270px; right:0; height:350px; width:990px;"></div>
+                    <div class="slide-title">
+                        <h1>Biomedical<br>Research<br>Institution</h1>
+                    </div>
+                    <a href="#" class="slide-link">View project</a>
+                </div>
+            </div>
+
+            <!-- Slide 2 : Solar Farm Installation -->
+            <div class="slide" data-slide="2">
+                <div class="slide-inner">
+                    <img src="https://images.unsplash.com/photo-1497440001374-f26997328c1b?w=1200&q=80"
+                        class="img-fit" style="bottom:70px; right:0; height:270px; width:920px;" alt="">
+                    <div class="slide-title">
+                        <h1 style="font-size:50px;">Solar Farm<br>Installation</h1>
+                    </div>
+                    <a href="#" class="slide-link">View project</a>
+                </div>
+            </div>
+
+            <!-- Slide 3 : JNB11 Data Centre (vue extérieure) -->
+            <div class="slide" data-slide="3">
+                <div class="slide-inner">
+                    <img src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1200&q=80"
+                        class="img-fit" style="top:60px; right:0; height:140px; width:1190px;" alt="">
+                    <div class="panel-grey" style="top:200px; right:0; height:470px; width:1190px;"></div>
+                    <div class="slide-title">
+                        <h1>JNB11 Data<br>Centre</h1>
+                    </div>
+                    <a href="#" class="slide-link">View project</a>
+                </div>
+            </div>
+
+            <!-- Slide 4 : JNB11 Data Centre (variante sombre) -->
+            <div class="slide" data-slide="4">
+                <div class="slide-inner is-dark">
+                    <div class="slide-title">
+                        <h1>JNB11 Data<br>Centre</h1>
+                    </div>
+                    <a href="#" class="slide-link">View project</a>
+                </div>
+            </div>
+
+            <!-- Navigation précédent/suivant : 4 paires superposées, une seule visible à la fois -->
+            <div class="nav-controls">
+                <div class="nav-pair" data-for="1">
+                    <label for="slide-4" class="nav-btn">‹</label>
+                    <label for="slide-2" class="nav-btn">→</label>
+                </div>
+                <div class="nav-pair" data-for="2">
+                    <label for="slide-1" class="nav-btn">‹</label>
+                    <label for="slide-3" class="nav-btn">→</label>
+                </div>
+                <div class="nav-pair" data-for="3">
+                    <label for="slide-2" class="nav-btn">‹</label>
+                    <label for="slide-4" class="nav-btn">→</label>
+                </div>
+                <div class="nav-pair" data-for="4">
+                    <label for="slide-3" class="nav-btn">‹</label>
+                    <label for="slide-1" class="nav-btn">→</label>
+                </div>
+            </div>
+
+            <!-- Indicateurs : points cliquables pour aller directement à une slide -->
+            <div class="dots">
+                <label for="slide-1" class="dot"></label>
+                <label for="slide-2" class="dot"></label>
+                <label for="slide-3" class="dot"></label>
+                <label for="slide-4" class="dot"></label>
+            </div>
+
+        </div>
+
+    </section>
+
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Carousel — Tailwind, sans JS</title>
+    <style>
+        /* =====================================================================
+           MOTEUR D'ÉTAT DU CAROUSEL — irréductible en Tailwind seul.
+           Tailwind n'a pas d'utilitaire pour ":checked ~ descendant-profond",
+           donc ces 3 blocs restent en CSS natif. Tout le reste (mise en page,
+           couleurs, tailles, dégradés, hover) est en classes Tailwind ci-dessous.
+           ===================================================================== */
+        #slide-1:checked ~ .carousel-stage [data-slide="1"],
+        #slide-2:checked ~ .carousel-stage [data-slide="2"],
+        #slide-3:checked ~ .carousel-stage [data-slide="3"],
+        #slide-4:checked ~ .carousel-stage [data-slide="4"] {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            pointer-events: auto;
+            z-index: 3;
+            transition: opacity .55s ease .4s, transform .6s cubic-bezier(.2, .8, .2, 1) .4s;
+        }
+
+        #slide-1:checked ~ .carousel-stage .nav-pair[data-for="1"],
+        #slide-2:checked ~ .carousel-stage .nav-pair[data-for="2"],
+        #slide-3:checked ~ .carousel-stage .nav-pair[data-for="3"],
+        #slide-4:checked ~ .carousel-stage .nav-pair[data-for="4"] {
+            display: flex;
+        }
+
+        #slide-1:checked ~ .carousel-stage .dots label[for="slide-1"],
+        #slide-2:checked ~ .carousel-stage .dots label[for="slide-2"],
+        #slide-3:checked ~ .carousel-stage .dots label[for="slide-3"],
+        #slide-4:checked ~ .carousel-stage .dots label[for="slide-4"] {
+            background-color: #fff;
+            transform: scaleX(1.8);
+        }
+    </style>
+</head>
+
+<body class="flex min-h-screen items-center justify-center bg-[#0b1d4d] p-6 font-sans">
+
+    <section id="carousel" class="mx-auto w-full max-w-7xl">
+
+        <!-- Radios cachés : mémoire d'état du carousel, pilotés uniquement en CSS.
+             Doivent être frères directs de .carousel-stage pour que le
+             combinateur ~ (sibling) fonctionne dans les règles ci-dessus. -->
+        <input type="radio" name="carousel-slide" id="slide-1" class="hidden" checked>
+        <input type="radio" name="carousel-slide" id="slide-2" class="hidden">
+        <input type="radio" name="carousel-slide" id="slide-3" class="hidden">
+        <input type="radio" name="carousel-slide" id="slide-4" class="hidden">
+
+        <!-- Cadre du carousel : toutes les slides sont superposées à l'intérieur -->
+        <div class="carousel-stage relative h-[620px] w-full overflow-hidden rounded-sm shadow-2xl">
+
+            <!-- Slide 1 : Biomedical Research Institution -->
+            <div class="slide pointer-events-none absolute inset-0 z-[1] origin-center scale-[0.82]
+                        translate-y-[90px] opacity-0 transition-all duration-500 ease-[cubic-bezier(.6,.05,.25,1)]"
+                data-slide="1">
+                <div class="relative h-full w-full overflow-hidden bg-[#0b1d4d]">
+                    <img src="assets/about-company-2.webp"
+                        class="absolute inset-0 h-full w-full object-cover" alt="">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/65 via-black/25 to-black/5"></div>
+                    <div class="absolute left-12 top-1/2 max-w-[600px] -translate-y-1/2">
+                        <h1 class="text-[58px] font-extrabold uppercase leading-[0.95] tracking-tight text-white">
+                            Biomedical<br>Research<br>Institution
+                        </h1>
+                    </div>
+                    <a href="#"
+                        class="absolute bottom-20 left-12 border-b border-white/60 pb-1 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:text-white/70">
+                        View project
+                    </a>
+                </div>
+            </div>
+
+            <!-- Slide 2 : Solar Farm Installation -->
+            <div class="slide pointer-events-none absolute inset-0 z-[1] origin-center scale-[0.82]
+                        translate-y-[90px] opacity-0 transition-all duration-500 ease-[cubic-bezier(.6,.05,.25,1)]"
+                data-slide="2">
+                <div class="relative h-full w-full overflow-hidden bg-[#0b1d4d]">
+                    <img src="assets/about-company-2.webp"
+                        class="absolute inset-0 h-full w-full object-cover" alt="">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/65 via-black/25 to-black/5"></div>
+                    <div class="absolute left-12 top-1/2 max-w-[600px] -translate-y-1/2">
+                        <h1 class="text-[50px] font-extrabold uppercase leading-[0.95] tracking-tight text-white">
+                            Solar Farm<br>Installation
+                        </h1>
+                    </div>
+                    <a href="#"
+                        class="absolute bottom-20 left-12 border-b border-white/60 pb-1 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:text-white/70">
+                        View project
+                    </a>
+                </div>
+            </div>
+
+            <!-- Slide 3 : JNB11 Data Centre (vue extérieure) -->
+            <div class="slide pointer-events-none absolute inset-0 z-[1] origin-center scale-[0.82]
+                        translate-y-[90px] opacity-0 transition-all duration-500 ease-[cubic-bezier(.6,.05,.25,1)]"
+                data-slide="3">
+                <div class="relative h-full w-full overflow-hidden bg-[#0b1d4d]">
+                    <img src="assets/about-company-2.webp"
+                        class="absolute inset-0 h-full w-full object-cover" alt="">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/65 via-black/25 to-black/5"></div>
+                    <div class="absolute left-12 top-1/2 max-w-[600px] -translate-y-1/2">
+                        <h1 class="text-[58px] font-extrabold uppercase leading-[0.95] tracking-tight text-white">
+                            JNB11 Data<br>Centre
+                        </h1>
+                    </div>
+                    <a href="#"
+                        class="absolute bottom-20 left-12 border-b border-white/60 pb-1 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:text-white/70">
+                        View project
+                    </a>
+                </div>
+            </div>
+
+            <!-- Slide 4 : JNB11 Data Centre (variante sombre, sans photo) -->
+            <div class="slide pointer-events-none absolute inset-0 z-[1] origin-center scale-[0.82]
+                        translate-y-[90px] opacity-0 transition-all duration-500 ease-[cubic-bezier(.6,.05,.25,1)]"
+                data-slide="4">
+                <div class="relative h-full w-full bg-neutral-600">
+                    <div class="absolute left-12 top-1/2 max-w-[600px] -translate-y-1/2">
+                        <h1 class="text-[58px] font-extrabold uppercase leading-[0.95] tracking-tight text-white">
+                            JNB11 Data<br>Centre
+                        </h1>
+                    </div>
+                    <a href="#"
+                        class="absolute bottom-20 left-12 border-b border-white/60 pb-1 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:text-white/70">
+                        View project
+                    </a>
+                </div>
+            </div>
+
+            <!-- Navigation précédent/suivant : 4 paires superposées, une seule visible à la fois -->
+            <div class="absolute bottom-10 left-12 z-20">
+                <div class="nav-pair hidden gap-3" data-for="1">
+                    <label for="slide-4"
+                        class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/50 text-white transition-colors hover:bg-white/10">‹</label>
+                    <label for="slide-2"
+                        class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/50 text-white transition-colors hover:bg-white/10">→</label>
+                </div>
+                <div class="nav-pair hidden gap-3" data-for="2">
+                    <label for="slide-1"
+                        class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/50 text-white transition-colors hover:bg-white/10">‹</label>
+                    <label for="slide-3"
+                        class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/50 text-white transition-colors hover:bg-white/10">→</label>
+                </div>
+                <div class="nav-pair hidden gap-3" data-for="3">
+                    <label for="slide-2"
+                        class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/50 text-white transition-colors hover:bg-white/10">‹</label>
+                    <label for="slide-4"
+                        class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/50 text-white transition-colors hover:bg-white/10">→</label>
+                </div>
+                <div class="nav-pair hidden gap-3" data-for="4">
+                    <label for="slide-3"
+                        class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/50 text-white transition-colors hover:bg-white/10">‹</label>
+                    <label for="slide-1"
+                        class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/50 text-white transition-colors hover:bg-white/10">→</label>
+                </div>
+            </div>
+
+            <!-- Indicateurs : points cliquables pour aller directement à une slide -->
+            <div class="dots absolute bottom-10 right-10 z-20 flex gap-2">
+                <label for="slide-1" class="dot h-1.5 w-6 cursor-pointer rounded-full bg-white/30 transition-all"></label>
+                <label for="slide-2" class="dot h-1.5 w-6 cursor-pointer rounded-full bg-white/30 transition-all"></label>
+                <label for="slide-3" class="dot h-1.5 w-6 cursor-pointer rounded-full bg-white/30 transition-all"></label>
+                <label for="slide-4" class="dot h-1.5 w-6 cursor-pointer rounded-full bg-white/30 transition-all"></label>
+            </div>
+
+        </div>
+
+    </section>
+
+</body>
+</html>

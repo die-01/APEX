@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Carousel — Tailwind, sans JS</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/3.4.4/tailwind.min.js"></script>
+    <style>
+        /* Inputs radio cachés : moteur d'état du carousel (aucun JS) */
+        .slide-radio {
+            display: none;
+        }
+
+        /* État par défaut d'une slide : réduite et placée en bas, prête à entrer */
+        .slide {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transform: scale(0.82) translateY(90px);
+            transition: opacity .45s ease, transform .55s cubic-bezier(.6, .05, .25, 1);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Slide active : taille normale, centrée, visible */
+        #slide-1:checked~.carousel-stage [data-slide="1"],
+        #slide-2:checked~.carousel-stage [data-slide="2"],
+        #slide-3:checked~.carousel-stage [data-slide="3"],
+        #slide-4:checked~.carousel-stage [data-slide="4"] {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            pointer-events: auto;
+            z-index: 3;
+            transition: opacity .55s ease .4s, transform .6s cubic-bezier(.2, .8, .2, 1) .4s;
+        }
+
+        /* Slide qui vient de quitter l'état actif : remonte en se réduisant */
+        .slide.is-leaving {
+            transform: scale(0.82) translateY(-90px);
+            opacity: 0;
+            transition: opacity .4s ease, transform .5s cubic-bezier(.6, .05, .25, 1);
+        }
+
+        /* Boutons précédent/suivant : une paire par slide active, une seule visible à la fois */
+        .nav-pair {
+            display: none;
+        }
+
+        #slide-1:checked~.carousel-stage .nav-pair[data-for="1"],
+        #slide-2:checked~.carousel-stage .nav-pair[data-for="2"],
+        #slide-3:checked~.carousel-stage .nav-pair[data-for="3"],
+        #slide-4:checked~.carousel-stage .nav-pair[data-for="4"] {
+            display: flex;
+        }
+
+        /* Indicateurs (points) : le point actif s'allonge et devient blanc */
+        .dot {
+            transition: background-color .3s ease, transform .3s ease;
+        }
+
+        #slide-1:checked~.carousel-stage .dots label[for="slide-1"],
+        #slide-2:checked~.carousel-stage .dots label[for="slide-2"],
+        #slide-3:checked~.carousel-stage .dots label[for="slide-3"],
+        #slide-4:checked~.carousel-stage .dots label[for="slide-4"] {
+            background-color: #fff;
+            transform: scaleX(1.8);
+        }
+    </style>
+</head>
+
+<body class="flex min-h-screen items-center justify-center bg-[#0b1d4d] p-6 font-sans">
+
+    <!-- Radios cachés : mémoire d'état du carousel, pilotés uniquement en CSS -->
+    <input type="radio" name="carousel-slide" id="slide-1" class="slide-radio" checked>
+    <input type="radio" name="carousel-slide" id="slide-2" class="slide-radio">
+    <input type="radio" name="carousel-slide" id="slide-3" class="slide-radio">
+    <input type="radio" name="carousel-slide" id="slide-4" class="slide-radio">
+
+    <section class="mx-auto w-full max-w-7xl" id="carousel">
+
+        <!-- Cadre du carousel : toutes les slides sont superposées à l'intérieur -->
+        <div class="carousel-stage relative h-[620px] w-full overflow-hidden rounded-sm shadow-2xl">
+
+            <!-- Slide 1 : Biomedical Research Institution -->
+            <div class="slide" data-slide="1">
+                <div class="relative h-full w-full bg-[#0b1d4d]">
+                    <!-- Image -->
+                    <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=1200&q=80"
+                        class="absolute right-0 top-0 h-[270px] w-[990px] object-cover" alt="">
+                    <!-- Fond clair sous l'image -->
+                    <div class="absolute right-0 top-[270px] h-[350px] w-[990px] bg-[#f4f4f4]"></div>
+                    <!-- Titre -->
+                    <div class="absolute left-12 top-1/2 max-w-[600px] -translate-y-1/2">
+                        <h1 class="text-[60px] font-extrabold uppercase leading-[0.95] tracking-tight text-white">
+                            Biomedical<br>Research<br>Institution
+                        </h1>
+                    </div>
+                    <!-- Lien -->
+                    <a href="#"
+                        class="absolute bottom-20 left-12 border-b border-white/60 pb-1 text-xs font-bold uppercase tracking-widest text-white hover:text-white/70">
+                        View project
+                    </a>
+                </div>
+            </div>
+
+            <!-- Slide 2 : Solar Farm Installation -->
+            <div class="slide" data-slide="2">
+                <div class="relative h-full w-full bg-[#0b1d4d]">
+                    <img src="https://images.unsplash.com/photo-1497440001374-f26997328c1b?w=1200&q=80"
+                        class="absolute bottom-[70px] right-0 h-[270px] w-[920px] object-cover" alt="">
+                    <div class="absolute left-12 top-1/2 max-w-[600px] -translate-y-1/2">
+                        <h1 class="text-[52px] font-extrabold uppercase leading-[0.95] tracking-tight text-white">
+                            Solar Farm<br>Installation
+                        </h1>
+                    </div>
+                    <a href="#"
+                        class="absolute bottom-20 left-12 border-b border-white/60 pb-1 text-xs font-bold uppercase tracking-widest text-white hover:text-white/70">
+                        View project
+                    </a>
+                </div>
+            </div>
+
+            <!-- Slide 3 : JNB11 Data Centre (vue extérieure) -->
+            <div class="slide" data-slide="3">
+                <div class="relative h-full w-full bg-[#0b1d4d]">
+                    <img src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1200&q=80"
+                        class="absolute right-0 top-[60px] h-[140px] w-[1190px] object-cover" alt="">
+                    <div class="absolute right-0 top-[200px] h-[470px] w-[1190px] bg-[#cfcfcf]"></div>
+                    <div class="absolute left-12 top-1/2 max-w-[600px] -translate-y-1/2">
+                        <h1 class="text-[58px] font-extrabold uppercase leading-[0.95] tracking-tight text-white">
+                            JNB11 Data<br>Centre
+                        </h1>
+                    </div>
+                    <a href="#"
+                        class="absolute bottom-20 left-12 border-b border-white/60 pb-1 text-xs font-bold uppercase tracking-widest text-white hover:text-white/70">
+                        View project
+                    </a>
+                </div>
+            </div>
+
+            <!-- Slide 4 : JNB11 Data Centre (variante sombre) -->
+            <div class="slide" data-slide="4">
+                <div class="relative h-full w-full bg-neutral-600">
+                    <div class="absolute left-12 top-1/2 max-w-[600px] -translate-y-1/2">
+                        <h1 class="text-[58px] font-extrabold uppercase leading-[0.95] tracking-tight text-white">
+                            JNB11 Data<br>Centre
+                        </h1>
+                    </div>
+                    <a href="#"
+                        class="absolute bottom-20 left-12 border-b border-white/60 pb-1 text-xs font-bold uppercase tracking-widest text-white hover:text-white/70">
+                        View project
+                    </a>
+                </div>
+            </div>
+
+            <!-- Navigation précédent/suivant : 4 paires superposées, une seule visible à la fois -->
+            <div class="absolute bottom-10 left-12 z-20">
+                <div class="nav-pair flex gap-3" data-for="1">
+                    <label for="slide-4"
+                        class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/50 text-white transition-colors hover:bg-white/10">‹</label>
+                    <label for="slide-2"
+                        class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/50 text-white transition-colors hover:bg-white/10">→</label>
+                </div>
+                <div class="nav-pair flex gap-3" data-for="2">
+                    <label for="slide-1"
+                        class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/50 text-white transition-colors hover:bg-white/10">‹</label>
+                    <label for="slide-3"
+                        class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/50 text-white transition-colors hover:bg-white/10">→</label>
+                </div>
+                <div class="nav-pair flex gap-3" data-for="3">
+                    <label for="slide-2"
+                        class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/50 text-white transition-colors hover:bg-white/10">‹</label>
+                    <label for="slide-4"
+                        class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/50 text-white transition-colors hover:bg-white/10">→</label>
+                </div>
+                <div class="nav-pair flex gap-3" data-for="4">
+                    <label for="slide-3"
+                        class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/50 text-white transition-colors hover:bg-white/10">‹</label>
+                    <label for="slide-1"
+                        class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/50 text-white transition-colors hover:bg-white/10">→</label>
+                </div>
+            </div>
+
+            <!-- Indicateurs : points cliquables pour aller directement à une slide -->
+            <div class="dots absolute bottom-10 right-10 z-20 flex gap-2">
+                <label for="slide-1" class="dot h-1.5 w-6 cursor-pointer rounded-full bg-white/30"></label>
+                <label for="slide-2" class="dot h-1.5 w-6 cursor-pointer rounded-full bg-white/30"></label>
+                <label for="slide-3" class="dot h-1.5 w-6 cursor-pointer rounded-full bg-white/30"></label>
+                <label for="slide-4" class="dot h-1.5 w-6 cursor-pointer rounded-full bg-white/30"></label>
+            </div>
+
+        </div>
+
+    </section>
+
+</body>
+</html>
