@@ -24,3 +24,15 @@ form.onsubmit = function (e) {
             document.getElementById('msg-succes').classList.remove('hidden');
         });
 };
+
+
+
+document.querySelectorAll('img').forEach(img => {
+    // Si l'image est déjà chargée (via le cache du navigateur)
+    if (img.complete) {
+        img.classList.remove('opacity-0');
+    } else {
+        // Sinon, on attend qu'elle finisse de charger à 100%
+        img.addEventListener('load', () => img.classList.remove('opacity-0'));
+    }
+});
